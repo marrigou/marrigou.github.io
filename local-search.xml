@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>【教程01】cheat engine使用指南</title>
+    <link href="/2023/08/26/cheat%20engine%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/"/>
+    <url>/2023/08/26/cheat%20engine%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/</url>
+    
+    <content type="html"><![CDATA[<p>备注：文章采用的例子是肥鹅健身房，并不是一个好例子，因为虽然明面上修改了，实际上并没有，毕竟是流水很大的游戏了，这些数据肯定是进服务器校验的，没给封号就已经算仁慈了。但是，有一些游戏是可以永久性修改的，也实验成功了，暂时还没去深究底层原理是什么。</p><ol><li><p>电脑端打开小游戏程序<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006114504.png" alt="image.png|500"></p></li><li><p>ctrl+alt+delete打开任务管理器，找到微信<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006115934.png" alt="image.png|500"><br>展开<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006115959.png" alt="image.png|225"><br>随便选一个右键，选择转到详细信息<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006120021.png" alt="image.png|355"><br>找到占用内存最多的程序对应的PID值，23640<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006120117.png" alt="image.png|500"><br>23640的十六进制值为5C58<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006120231.png" alt="image.png|475"></p></li><li><p>打开 cheat engine<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006114638.png" alt="image.png|500"></p></li><li><p>打开进程列表，选择“当前进程”，找到5C58对应的进程，打开<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006120346.png" alt="image.png|500"><br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006114848.png" alt="image.png|500"></p></li><li><p>找到要修改的数据，比如能量是316，在cheat engine中的数值框中输入316*2后的结果<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006115248.png" alt="image.png|950"></p></li><li><p>首次扫描<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006115343.png" alt="image.png|473"><br>右边会显示扫描结果<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006115412.png" alt="image.png|500"></p></li><li><p>在小游戏中让能量值发生变化<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006115537.png" alt="image.png|446"><br>比如，由之前的316变成了315<br>接下来在cheat engine中修改数值为315*2后的结果630，点击再次扫描<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231006115655.png" alt="image.png|500"></p></li></ol>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>java学习日志</title>
     <link href="/2023/06/28/%E9%9F%A9%E9%A1%BA%E5%B9%B3JAVA/"/>
     <url>/2023/06/28/%E9%9F%A9%E9%A1%BA%E5%B9%B3JAVA/</url>
