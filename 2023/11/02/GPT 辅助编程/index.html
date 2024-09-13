@@ -1,0 +1,735 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20240618033026.png">
+  <link rel="icon" href="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20240618033026.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="提示精灵-主页OpenAI Cookbook知识星球 一、核心要素向 GPT 有效提问，有个专业词叫 Prompt，核心动作就三个：任务、指令、角色。任务指的是你提问的主题；指令指的是你对主题的限制条件；角色指的是你让 GPT 以什么角色来回答你的问题； 为了让 GPT 更能清楚我的指令，小林给出具体的规则，以及加上&lt;&gt;，&lt;&gt;的重点是让 GPT 意识到这是重点。 OpenA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【教程02】GPT 辅助">
+<meta property="og:url" content="http://example.com/2023/11/02/GPT%20%E8%BE%85%E5%8A%A9%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="提示精灵-主页OpenAI Cookbook知识星球 一、核心要素向 GPT 有效提问，有个专业词叫 Prompt，核心动作就三个：任务、指令、角色。任务指的是你提问的主题；指令指的是你对主题的限制条件；角色指的是你让 GPT 以什么角色来回答你的问题； 为了让 GPT 更能清楚我的指令，小林给出具体的规则，以及加上&lt;&gt;，&lt;&gt;的重点是让 GPT 意识到这是重点。 OpenA">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231108233606.png">
+<meta property="article:published_time" content="2023-11-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-13T12:09:07.288Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231108233606.png">
+  
+  
+  
+  <title>【教程02】GPT 辅助 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 25vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Marigo&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【教程02】GPT 辅助"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-11-02 00:00" pubdate>
+          2023年11月2日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          20 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【教程02】GPT 辅助</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><a target="_blank" rel="noopener" href="https://www.promptgenius.site/">提示精灵-主页</a><br><a target="_blank" rel="noopener" href="https://cookbook.openai.com/">OpenAI Cookbook</a><br><a target="_blank" rel="noopener" href="https://articles.zsxq.com/id_1gr9k9156w4h.html">知识星球 </a><br><strong>一、核心要素</strong><br>向 GPT 有效提问，有个专业词叫 Prompt，核心动作就三个：任务、指令、角色。<br>任务指的是你提问的主题；<br>指令指的是你对主题的限制条件；<br>角色指的是你让 GPT 以什么角色来回答你的问题；</p>
+<p>为了让 GPT 更能清楚我的指令，小林给出具体的规则，以及加上&lt;&gt;，&lt;&gt;的重点是让 GPT 意识到这是重点。<br><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20231108233606.png" srcset="/img/loading.gif" lazyload alt="image.png|500"></p>
+<p><a target="_blank" rel="noopener" href="https://futureforce.feishu.cn/file/CMpdbLxAhon5K5x5C1OcciYwnOf">OpenAI:GPT 最佳实践中文大白话版本</a></p>
+<ol>
+<li>清晰告诉GPT想要什么<ol>
+<li>输入越清晰越具体越好</li>
+<li>要长输出还是短输出，指单词数、句子数、段落数等，一个汉字大概是2~2.5个tokens，100个tokens带个是75个单词，可以统一规定输出是多少tokens</li>
+<li>要专家级输出还是简单输出</li>
+<li>嫌输出格式不好，那就给个样例</li>
+<li>角色扮演一直好用</li>
+<li>使用分隔符把话和话分开，三引号、xml标记也可以，主要是为了区分出不同文本</li>
+<li>展开解题步骤</li>
+<li>多给几个例子</li>
+</ol>
+</li>
+<li>给GPT发阅读材料<ol>
+<li>要求按阅读材料作答，不开放作答</li>
+<li>增加要求：要求GPT将阅读材料中的原文引用出来</li>
+</ol>
+</li>
+<li>把复杂任务拆解成子任务</li>
+<li>时不时对以上的对话内容进行总结，做个前情提要</li>
+<li>如果GPT没有输出完全，可以告诉他“哎，还没做完呢”</li>
+</ol>
+<h1 id="提示词教程"><a href="#提示词教程" class="headerlink" title="提示词教程"></a>提示词教程</h1><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/625565256">[Misc] 科研实用 ChatGPT Prompts&#x2F;Tricks - 知乎</a><br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/592937997/answer/2962566176">chatgpt学术提问模板有哪些？chatgpt的prompt有哪些？ - 知乎</a><br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/593971202/answer/2972199269">你在使用ChatGPT进行论文润色时的指令有哪些? - 知乎</a><br><a target="_blank" rel="noopener" href="https://b.ai6868.top/?p=354">ChatGPT 100条 指令大全 更能解决你的问题！ChatGPT 万能指令(必看)！！！ - GPT 账号网</a><br><a target="_blank" rel="noopener" href="https://www.promptingguide.ai/zh">提示工程指南 | Prompt Engineering Guide</a><br><a target="_blank" rel="noopener" href="https://www.promptgenius.site/">提示精灵-主页</a></p>
+<h1 id="prompt"><a href="#prompt" class="headerlink" title="prompt"></a>prompt</h1><h2 id="了解、检索新的研究领域"><a href="#了解、检索新的研究领域" class="headerlink" title="了解、检索新的研究领域"></a>了解、检索新的研究领域</h2><p>场景：</p>
+<ul>
+<li><ol>
+<li>你想了解一个新的研究领域，或</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>你对一个特定技术感兴趣，但不知道该技术是否&#x2F;在哪些领域被讨论过。<br>示例Prompt:</li>
+</ol>
+</li>
+<li><ol>
+<li>I’m a researcher working in [研究领域], can you introduce me the field of [你感兴趣的子领域] from the perspective of XXX, XXX, and [其他解释角度] ?</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>I’m a researcher working in [研究领域]. I’m thinking of [感兴趣的技术方案的描述]. Has this strategy been discussed in the related research literature? If so, show me some examples of how existing works achieved this.</li>
+</ol>
+</li>
+</ul>
+<h2 id="获取参考文献"><a href="#获取参考文献" class="headerlink" title="获取参考文献"></a>获取参考文献</h2><p>ChatGPT经常会使用&#x2F;给出不存在的参考文献，使用以下prompt可以很大程度上避免这种情况发生：<br>Please attach all your references at the last in [你想要的格式] format. Make sure that they can be found on Google Scholar.</p>
+<h2 id="润色语言"><a href="#润色语言" class="headerlink" title="润色语言"></a>润色语言</h2><p>场景：</p>
+<ul>
+<li><ol>
+<li>论文写作润色，</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>Rebuttal&#x2F;邮件润色。</li>
+</ol>
+</li>
+<li>1）I’m a researcher working in [研究领域]. I want you to act as an English translator, spelling corrector, and improver. Please polish my text to meet the academic standard in my research area, your goal is to improve the spelling, grammar, <a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=clarity&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:%222972199269%22%7D">clarity</a>, concision, and overall readability. When necessary, rewrite the whole sentence. Furthermore, list all modifications and explain the reasons to do so in a markdown table. Now please polish the following text: [文本]</li>
+</ul>
+<ol start="2">
+<li>I’m doing a rebuttal for a paper submitted to a venue in the field of [研究领域]. My goal is to answer reviewers’ questions in polite, professional, and academic language. Following these standards, please help me correct the grammar mistakes and make the language more natural and fluent, and keep the meaning of the sentences if possible. Following is the text to be rephrased: [文本]</li>
+<li>请帮我润色我的论文。我需要进行语法和拼写检查，优化句子结构和表达，调整逻辑和结构，确保学术用语和术语准确，检查引用和参考文献格式，调整风格和语气，补充和删除必要的内容，检查图表和图示，确认格式和排版是否正确。[在这里粘贴您的论文] 请在润色过程中提供详细的反馈和建议，以指导您的修改。谢谢！</li>
+<li>请你现在扮演一个[这里放你所研究的领域] 领域的专家，从专业的角度，您认为上面这些内容是否有需要修改的地方？注意，不要全文修改，您需要一一指出需要修改的地方，并且给出修改意见以及推荐的修改内容。</li>
+<li>Prompt: I want you to act as an academic journal editor. Please rephrase the paragraph from an academic angle based on the writing style of the Nature journal.</li>
+</ol>
+<h2 id="简单修改"><a href="#简单修改" class="headerlink" title="简单修改"></a>简单修改</h2><ol>
+<li>Prompt: Please rewrite and revise this paragraph in Chinese</li>
+</ol>
+<h2 id="起标题"><a href="#起标题" class="headerlink" title="起标题"></a>起标题</h2><ol>
+<li>Prompt: I am writing a scientific paper. Can you help me think a good acronym of the following topic: A New low power Implantable Wireless Brain Machine Interface.</li>
+<li>Prompt: “ALOWIBMI” is not good. can you find other one with positive meaning?</li>
+</ol>
+<h2 id="催稿"><a href="#催稿" class="headerlink" title="催稿"></a>催稿</h2><ol>
+<li>Prompt: I am a graduate student. I want to write an email to the reviewer of Nature journal to ask him to accelerate the review process of my submitted paper.</li>
+</ol>
+<h2 id="简写-降低重复率"><a href="#简写-降低重复率" class="headerlink" title="简写&#x2F;降低重复率"></a>简写&#x2F;降低重复率</h2><p>Prompt: </p>
+<ul>
+<li>1）Please keep your answer concise and less ChatGPT-like.</li>
+<li>2）请你充当一位[某个]领域的专家，对文本去重。如果文本中连续13个字一样，就算重复。你需要通过调整主谓宾语序替换同义词、增减字数等方法，来达到论文去重的目的。请你修改下面这段文字：[文本内容]</li>
+</ul>
+<h2 id="内容扩写"><a href="#内容扩写" class="headerlink" title="内容扩写"></a>内容扩写</h2><p>Prompt： 请你参考[某某领域]同类论文，帮我在[研究背景和意义]这一级目录下面，再增加三个子目录，并写出三个子目录的主要内容。</p>
+<h2 id="优化语法句法"><a href="#优化语法句法" class="headerlink" title="优化语法句法"></a>优化语法句法</h2><p>Prompt：[文本内容]这段文本在语法上是不正确的，请你修改这段文本。<br>Prompt：[文本内容]这段文本的主语和动词在这句话中不一致，请你改正这段文本。<br>Prompt：[文本内容]这段文本似乎不合适，请你重新措辞以表达更清晰。<br>Prompt：[文本内容]我在这段文本中使用了被动语态，请你考虑改用主动语态。</p>
+<h2 id="内容改写"><a href="#内容改写" class="headerlink" title="内容改写"></a>内容改写</h2><p>Prompt：[文本内容]请你对文本进行微调。<br>Prompt：[文本内容]请你提高文本流畅度和连贯性。<br>Prompt：[文本内容]请你重新构建内容。</p>
+<h2 id="理解code"><a href="#理解code" class="headerlink" title="理解code"></a>理解code</h2><ol>
+<li>Prompt: What does the following code do? [insert code here]</li>
+<li>你现在是一个 [程式语言] 专家，请告诉我以下的程式码在做什么。[附上程式码]</li>
+</ol>
+<h2 id="重构code"><a href="#重构code" class="headerlink" title="重构code"></a>重构code</h2><ol>
+<li>你现在是一个 Clean Code 专家，我有以下的程式码，请用更干净简洁的方式改写，让我的同事们可以更容易维护程式码。另外，也解释为什么你要这样重构，让我能把重构的方式的说明加到 Pull Request 当中。[附上程式码]</li>
+</ol>
+<h2 id="改bug"><a href="#改bug" class="headerlink" title="改bug"></a>改bug</h2><ol>
+<li>你现在是一个 [程式语言] 专家，我有一段程式码，我预期这段程式码可以 [做到某个功能]，只是它通过不了 [测试案例] 这个测试案例。请帮我找出我哪里写错了，以及用正确的方式改写。[附上程式码]</li>
+</ol>
+<h2 id="写测试"><a href="#写测试" class="headerlink" title="写测试"></a>写测试</h2><ol>
+<li>你现在是一个 [程式语言] 专家，我有一段程式码 [附上程式码]，请帮我写一个测试，请至少提供五个测试案例，同时要包含到极端的状况，让我能够确定这段程式码的输出是正确的。</li>
+</ol>
+<h2 id="给代码添加注释"><a href="#给代码添加注释" class="headerlink" title="给代码添加注释"></a>给代码添加注释</h2><ol>
+<li>Prompt: Add comments to the following code [insert code here]</li>
+</ol>
+<h2 id="设计神经网络"><a href="#设计神经网络" class="headerlink" title="设计神经网络"></a>设计神经网络</h2><p>下面是我的需求（比较零散、没有考虑逻辑顺序的、头脑风暴后的结果，）： 1、学习、实践并且自己构建深度学习的神经网络，主要使用Pytorch框架，构建中可能需要掌握的知识比如：卷积核计算公式、其他等等 2、根据实际问题，需要调整神经网络哪里会有比较好的效果，我们着重在自己构建网络、修改别人的网络、利用别人的网络&#x2F;经典的网络解决具体算法应用问题 3、我会上传一段之前与ChatGPT大模型的对话内容，其中包含了我某些方面的需求，你可以初步知道我总需求中的小需求之一 4、定制辅导：你是一位长时间伴随我达成上述目标的导师，所以你要自己学习，回顾我们所有的对话，根据我的所有提问，推测我在神经网络学习与实践方面的水平，然后你以后的回答做出相应的调整或者优化网络 5、我在某些时候可能会要求你提出完整训练代码，包括训练测试评估等等，还有我会向你提供训练评估结果，你告诉我怎么调参 6、哪些工具&#x2F;网站代码&#x2F;python第三方库&#x2F;帮助构建、查看模型结构、网络可视化、训练评估可视化或者其他帮助的工具网站 7、根据我上面的需求，你可以建议我还可以提哪些需求</p>
+<p>我总结一下应该着重关注的主要需求： 第一重要：实践构建应用神经网络； 第二重要：根据实践中的问题修改优化网络、优化训练技巧、调参；</p>
+<p>Here are my needs (relatively scattered, without considering the logical order, the result of brainstorming):</p>
+<ol>
+<li>Learn, practice and build deep learning neural network by yourself, mainly using the Pytorch framework, the knowledge that may need to be mastered in the construction, such as convolution kernel calculation formula, etc.</li>
+<li>According to the actual problems, where the neural network needs to be adjusted to have better effects, we focus on building our own network, modifying others’ network, and using others’ network&#x2F;classic network to solve specific algorithm application problems.</li>
+<li>I will upload a previous dialogue with the ChatGPT large model, which contains some aspects of my needs, so you can preliminarily know one of the small needs in my total needs.</li>
+<li>Customized tutoring: you are a long-time mentor who accompanied me to achieve the above goals, so you have to learn by yourself, review all our conversations, and estimate my level of neural network learning and practice according to all my questions, and then make corresponding adjustments or optimize the network in your future answers.</li>
+<li>At some point, I may ask you to provide complete training code, including training test evaluation, etc., and I will provide you with the training evaluation results, and you tell me how to adjust the parameters. 6. Which tools&#x2F;website code&#x2F;python third-party libraries&#x2F;tools&#x2F;websites help build, view model structure, network visualization, training evaluation visualization or other help?</li>
+<li>According to my requirements above, can you suggest what requirements I can also mention?</li>
+</ol>
+<p>I summarize the main requirements that should be focused on: First important: practice building applied neural networks; Second important: modify and optimize the network according to the problems in practice, optimize training techniques, adjust parameters;</p>
+<h1 id="英文表述"><a href="#英文表述" class="headerlink" title="英文表述"></a>英文表述</h1><ul>
+<li>“Subtle edits only”: 仅对文本进行微调</li>
+<li>“Minor edits”: 进行一些小的编辑</li>
+<li>“Rephrase for clarity”: 改写以提高表达清晰度</li>
+<li>“Simplify sentence structure”: 简化句子结构</li>
+<li>“Check grammar and spelling”: 检查语法和拼写</li>
+<li>“Enhance flow and coherence”: 提高文本流畅度和连贯性</li>
+<li>“Improve word choice”: 改善用词</li>
+<li>“Revise for style”: 为文本调整风格</li>
+<li>“Significant edits”: 进行重大编辑</li>
+<li>“Restructure content”: 重新构建内容</li>
+</ul>
+<h1 id="账号购买"><a href="#账号购买" class="headerlink" title="账号购买"></a>账号购买</h1><p><a target="_blank" rel="noopener" href="https://buy.doudianpu.com/">ChatGPT 成品号特价 - 稳定、可靠</a><br><a target="_blank" rel="noopener" href="https://nf.video/">银河录像局 次世代合租平台</a><br><a target="_blank" rel="noopener" href="https://naifeistation.com/?invite=216">星际放映厅-专业级流媒体合租平台</a><br><a target="_blank" rel="noopener" href="https://api.ycestore.com/buy/4">ChatGPT Plus 代升级 | GPT-4.0 解锁开通 | 正规 Visa&#x2F;MasterCard 信用卡 | 可续费 | 永久质保 | 老王的2号杂货铺</a><br><a target="_blank" rel="noopener" href="https://bento.me/xydzip">微信foryglin 支持淘宝</a><br><a target="_blank" rel="noopener" href="https://m.ai6868.top/buy/5">ChatGPT -4 Plus账号【更懂你的AI】拼车 30天 | CHATGPT 账号网 最新ChatGPT注册方法教程【ChatGPT账号购买】</a><br><a target="_blank" rel="noopener" href="https://link3.cc/aichatgpt">AI意识觉醒 | Link3</a><br><a target="_blank" rel="noopener" href="http://www.hxdgpt.com/">首页 | chatgpt账号推送</a></p>
+<h1 id="GPT网站"><a href="#GPT网站" class="headerlink" title="GPT网站"></a>GPT网站</h1><p><a target="_blank" rel="noopener" href="https://chatglm.cn/main/detail">智谱清言</a> 中文、对话、文档、代码<br><a target="_blank" rel="noopener" href="https://docsgpt.arc53.com/">Site Unreachable</a><br><a target="_blank" rel="noopener" href="https://app.writesonic.com/library/a2ad892a-bcc4-44c1-9d11-56682fc14a2d/all">app.writesonic.com&#x2F;login</a><br><a target="_blank" rel="noopener" href="https://www.chatyy.com/search">ChatYY</a><br><a target="_blank" rel="noopener" href="https://hi.zhangsan.cloud/chat">Ai Loading</a><br><a target="_blank" rel="noopener" href="https://toolai.io/zh/">ToolAI 全球最完整最全面的AI人工智能工具集合</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【教程02】GPT 辅助</div>
+      <div>http://example.com/2023/11/02/GPT 辅助编程/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年11月2日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/08/26/cheat%20engine%20%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" title="【教程01】cheat engine使用指南">
+                        <span class="hidden-mobile">【教程01】cheat engine使用指南</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
