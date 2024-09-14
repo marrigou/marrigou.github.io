@@ -1,0 +1,678 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20240618033026.png">
+  <link rel="icon" href="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20240618033026.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="DPM前向-后向$x_0$是模型的起点变量，代表真实图像的分布。设定系数$\alpha_{t}$，令$\alpha_t&#x3D;1-\beta_t$。$q(x_t|x_{t-1})&#x3D;\mathcal{N}(\sqrt{\alpha_t}\mathrm{}x_{t-1},(1-\alpha_t)I)$按照线性高斯的特征，也可以看作是在$\sqrt{\alpha_t}x_{t-1}$的基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【学习】扩散模型缩减版">
+<meta property="og:url" content="http://example.com/2023/01/02/%E3%80%90%E5%AD%A6%E4%B9%A0%E3%80%91%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E7%BC%A9%E5%87%8F%E7%89%88/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="DPM前向-后向$x_0$是模型的起点变量，代表真实图像的分布。设定系数$\alpha_{t}$，令$\alpha_t&#x3D;1-\beta_t$。$q(x_t|x_{t-1})&#x3D;\mathcal{N}(\sqrt{\alpha_t}\mathrm{}x_{t-1},(1-\alpha_t)I)$按照线性高斯的特征，也可以看作是在$\sqrt{\alpha_t}x_{t-1}$的基础">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/webp/35710960/1694614255390-3e4d4fcd-b60d-4019-bb04-222e7367533d.webp#averageHue=%23f3f3f3&clientId=ub7b9eba7-83be-4&from=paste&height=281&id=u4b5ffa74&originHeight=722&originWidth=2620&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u4be45c9b-7c84-4ec9-ac26-1851b4d01f6&title=&width=1018">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/webp/35710960/1694614264503-da915ac3-6573-4721-994f-01b48b6c8953.webp#averageHue=%23f3f3f3&clientId=ub7b9eba7-83be-4&from=paste&height=356&id=uf4edbeba&originHeight=495&originWidth=1400&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u92d41d6f-aa4b-48f6-a739-124af0e1681&title=&width=1008">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694666100971-b9a5a9e7-0304-404a-8863-e7d48937afbe.png#averageHue=%23f7f6f6&clientId=u46e69163-a816-4&from=paste&height=157&id=u54bb05a0&originHeight=196&originWidth=924&originalType=binary&ratio=1&rotation=0&showTitle=false&size=19610&status=done&style=none&taskId=ud7a95a21-6f36-4c0a-8858-cdb54e22c2a&title=&width=741">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694666524794-1dbf95be-936a-4ad8-8e6d-00e460c7472f.png#averageHue=%23f9f9f9&clientId=u46e69163-a816-4&from=paste&height=189&id=uc9e4fa1e&originHeight=189&originWidth=938&originalType=binary&ratio=1&rotation=0&showTitle=false&size=27534&status=done&style=none&taskId=uadda1221-85fa-416c-b7b9-95d7c35b570&title=&width=938">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694666539854-2a0801ca-d045-4588-8364-dd58477ccf1c.png#averageHue=%23f6f6f6&clientId=u46e69163-a816-4&from=paste&height=77&id=ua96b3c76&originHeight=77&originWidth=336&originalType=binary&ratio=1&rotation=0&showTitle=false&size=5418&status=done&style=none&taskId=u5eba644a-31fb-47b0-9791-436058172c8&title=&width=336">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694670854027-8de1efea-f3e5-4648-b4f6-525080f2bc80.png#averageHue=%23f7f6f6&clientId=u46e69163-a816-4&from=paste&height=224&id=u6ef58cf8&originHeight=278&originWidth=1008&originalType=binary&ratio=1&rotation=0&showTitle=false&size=40564&status=done&style=none&taskId=u5fd0f062-aace-4dfc-9725-eb4a864e1e3&title=&width=811">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694711233805-fffa8380-cd45-4d7f-b84d-d9ffe4b0ea55.png#averageHue=%23f6f5f4&clientId=u44e270e5-ffc9-4&from=paste&height=961&id=u0fb10426&originHeight=961&originWidth=1611&originalType=binary&ratio=1&rotation=0&showTitle=false&size=214862&status=done&style=none&taskId=uc3059a0d-6c9c-4bda-a1d1-da4738bfbf2&title=&width=1611">
+<meta property="article:published_time" content="2023-01-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-14T12:10:16.771Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2023/webp/35710960/1694614255390-3e4d4fcd-b60d-4019-bb04-222e7367533d.webp#averageHue=%23f3f3f3&clientId=ub7b9eba7-83be-4&from=paste&height=281&id=u4b5ffa74&originHeight=722&originWidth=2620&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u4be45c9b-7c84-4ec9-ac26-1851b4d01f6&title=&width=1018">
+  
+  
+  
+  <title>【学习】扩散模型缩减版 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 25vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Marigo&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【学习】扩散模型缩减版"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-01-02 00:00" pubdate>
+          2023年1月2日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          50 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【学习】扩散模型缩减版</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="DPM"><a href="#DPM" class="headerlink" title="DPM"></a>DPM</h1><h2 id="前向-后向"><a href="#前向-后向" class="headerlink" title="前向-后向"></a>前向-后向</h2><p>$x_0$是模型的起点变量，代表真实图像的分布。<br>设定系数$\alpha_{t}$，令$\alpha_t&#x3D;1-\beta_t$。<br>$q(x_t|x_{t-1})&#x3D;\mathcal{N}(\sqrt{\alpha_t}\mathrm{<del>}x_{t-1},(1-\alpha_t)I)$<br>按照线性高斯的特征，也可以看作是在$\sqrt{\alpha_t}x_{t-1}$的基础上加上一个$\mathcal{N}(0,(1-\alpha_t)I)$的随机高斯噪声。<br>$$\begin{aligned}<br>x_{t}&amp; &#x3D;\sqrt{\alpha_t}\left.x_{t-1}+\mathcal{N}(0,(1-\alpha_t)I)\right.  \<br>&amp;&#x3D;\sqrt{\alpha_t}\left.x_{t-1}+\sqrt{1-\alpha_t}\right.\epsilon\quad,\epsilon\sim\mathcal{N}(0,I)<br>\end{aligned}$$<br>将以上公式展开，通过推导我们可以直接得到从$x_0$到$x_t$的变换：<br>$$\begin{aligned}<br>&amp;x_t&#x3D;\sqrt{\bar{\alpha}_t}\left.x_0+\sqrt{1-\bar{\alpha}<em>t}\right.\epsilon\quad,\bar{\alpha}&#x3D;\prod</em>{i&#x3D;1}^t\alpha_i,</del>\epsilon\sim\mathcal{N}(0,I) \<br>&amp;\sim\mathcal{N}(\sqrt{\bar{\alpha}<em>t}\left.x_0,(1-\bar{\alpha}<em>t)I\right)<br>\end{aligned}$$<br>逆向过程是从$x_T$开始，逐步解码成一个有意义的数据，比如图片。<br>逆向过程，联合概率$p(x</em>{0:T})$分解为：$p(x</em>{0:T})&#x3D;p(x_T)\prod_{t&#x3D;T-1}^0p(x_t|x_{t+1})$。<br><span style="background:#d3f8b6">目标是想要用一个神经网络去拟合条件概率分布</span>$p_\theta(x_t|x_{t+1})$。</p>
+<h2 id="目标函数"><a href="#目标函数" class="headerlink" title="目标函数"></a>目标函数</h2><p>通过推导，可以得到：ln$p(x_0)\geq 以下三个部分之和$<br>$\underbrace{\mathbb{E}<em>{q(x_1|x_0)}\left[\ln p_\theta(x_0|x_1)\right]}</em>{}-\underbrace{D_{\mathrm{KL}}\left(q(x_T|x_0)|p(x_T)\right)}<em>{}-\sum</em>{t&#x3D;2}^T\underbrace{\mathbb{E}<em>{q(x_t|x_0)}\left[D</em>{\mathrm{KL}}\left(q(x_{t-1}|x_t,x_0)|p_\theta(x_{t-1}|x_t))\right]\right]}$<br>第一项没有变化。<br>第二项有变化，但是没有影响。<br>第三项，需要采样的变量只剩下一个了。$q(x_{t-1}|x_t,x_0)$表示解码器的真实分布，$p_\theta(x_{t-1}|x_t)$表示参数化的模型。<br><strong>此时的结果就是我们想要的 ELBO 结果。</strong><br>要极大化 ELBO，需要其中每一项展开成具体的参数化公式。<br><strong>第二项</strong>不包含参数$\theta$，直接忽略。<br><strong>第一项</strong><br>$$\begin{aligned}<br>&amp;\arg\max_\theta\mathbb{E}<em>{q(x_1|x_0)}\left[\ln p_\theta(x_0|x_1)\right] \<br>&amp;\Leftrightarrow\arg\max_\theta\mathbb{E}</em>{q(x_1|x_0)}\left[-\frac12\left|x_0-\hat{x}<em>0(x_1,t&#x3D;1)\right|<em>2^2\right] \<br>&amp;\Leftrightarrow\arg\min_\theta\mathbb{E}</em>{q(x_1|x_0)}\left[\left|x_0-\hat{x}<em>0(x_1,t&#x3D;1)\right|<em>2^2\right]<br>\end{aligned}$$<br><strong>第三项</strong>是一个 KL 散度，两项都是高斯分布。<br>找到这两个高斯分布的均值和方差就可以计算 KL 散度了。<br>先看真实分布：<br>$q(x</em>{t-1}|x_t,x_0)\propto\mathcal{N}(x</em>{t-1};\underbrace{\frac{\sqrt{\alpha_t}(1-\bar{\alpha}</em>{t-1})x_t+\sqrt{\bar{\alpha}<em>{t-1}}(1-\alpha_t)x_0}{1-\bar{\alpha}<em>t}}</em>{\mu_q(x_t,x_0)},\underbrace{\frac{(1-\alpha_t)(1-\bar{\alpha}</em>{t-1})}{1-\bar{\alpha}<em>t}I)}</em>{\Sigma_q(t)}$<br>$q(x_{t-1}|x_t,x_0)$的均值是关于$x_t、x_0$的函数；方差仅与$\alpha$有关。<br>$\mu_q(x_t,x_0)&#x3D;\frac{\sqrt{\alpha_t}(1-\bar{\alpha}<em>{t-1})x_t+\sqrt{\bar{\alpha}</em>{t-1}}(1-\alpha_t)x_0}{1-\bar{\alpha}<em>t}$<br>$\Sigma_q(t)&#x3D;\frac{(1-\alpha_t)(1-\bar{\alpha}</em>{t-1})}{1-\bar{\alpha}<em>t}I&#x3D;\sigma_q^2(t)I$<br>对于参数化模型分布$p_\theta(x</em>{t-1}|x_t)$要尽可能接近$q(x_{t-1}|x_t,x_0)$，用$\mu_{\theta}$表示均值，$\Sigma_{\theta}$表示方差。<br>DDPM 中，直接让$\Sigma_\theta&#x3D;\Sigma_q(t)$。<br>极大化 ELBO，等同于极小化$D_{\mathrm{KL}}\left(q(x_{t-1}|x_t,x_0)|p_\theta(x_{t-1}|x_t)\right)$，又等同于极小化$\left[\left|\mu_\theta-\mu_q\right|<em>2^2\right]$。<br>$\mu_\theta$是模型需要预测的值，输入是$x_t$，所以$\mu_\theta$是$x_t$的一个函数。<br>前面已经推导了$\mu_q$，$\mu_q(x_t,x_0)&#x3D;\frac{\sqrt{\alpha_t}(1-\bar{\alpha}</em>{t-1})x_t+\sqrt{\bar{\alpha}<em>{t-1}}(1-\alpha_t)x_0}{1-\bar{\alpha}<em>t}$。<br>看出$\mu_q$也是一个关于$x_t$的函数。<br>目标是让$\mu_\theta$和$\mu_q$尽可能接近，那么完全可以人为定义成类似$\mu_q$的计算方式：<br>$\mu_\theta&#x3D;\mu_\theta(x_t,t)&#x3D;\frac{\sqrt{\alpha_t}(1-\bar{\alpha}</em>{t-1})x_t+\sqrt{\bar{\alpha}</em>{t-1}}(1-\alpha_t)\hat{x}<em>\theta(x_t,t)}{1-\bar{\alpha}<em>t}$<br>模型不再预测$\mu_\theta$，而是预测输出$\hat{x}<em>\theta(x_t,t)$。<br>简化$\left|\mu_\theta-\mu_q\right|<em>2^2&#x3D;\frac{\sqrt{\bar{\alpha}</em>{t-1}}(1-\alpha_t)}{1-\bar{\alpha}<em>t}\left|(\hat{x}<em>\theta(x_t,t)-x_0)\right|<em>2^2$。<br>$$\begin{aligned}<br>&amp;\arg\max_\theta\text{ ELBO} \<br>&amp;\Leftrightarrow\arg\max_\theta\left[\mathbb{E}</em>{q(x_1|x_0)}\left[\ln p_\theta(x_0|x_1)\right]-\sum</em>{t&#x3D;2}^T\mathbb{E}</em>{q(x_t|x_0)}\left[D</em>{\mathrm{KL}}\left(q(x</em>{t-1}|x_t,x_0)|p_\theta(x</em>{t-1}|x_t))\right)\right]\right] \<br>&amp;\Leftrightarrow\arg\min_\theta\left[\mathbb{E}_{q(x_1|x_0)}\left[\left|x_0-\hat{x}<em>0(x_1,t&#x3D;1)\right|<em>2^2\right]\right]+\left[\sum</em>{t&#x3D;2}^T\mathbb{E}</em>{q(x_t|x_0)}\left[\left|(\hat{x}<em>\theta(x_t,t)-x_0)\right|<em>2^2\right]\right] \<br>&amp;\Leftrightarrow\arg\min_\theta\sum</em>{t&#x3D;1}^T\mathbb{E}</em>{q(x_t|x_0)}\left[\left|(\hat{x}_\theta(x_t,t)-x_0)\right|_2^2\right]<br>\end{aligned}$$<br><strong>以上就是最终的目标函数。</strong><br><strong>对于任意</strong>$t\in[1,T]$<strong>，参数化模型输入</strong>$x_t$<strong>和</strong>$t$<strong>，输出</strong>$\hat{x}_\theta(x_t,t)$<strong>。</strong><br><strong>模型的目标是优化</strong>$\hat{x}<em>\theta(x_t,t)$<strong>和真实值</strong>$x_0$<strong>之间的平方误差。</strong><br><strong>公式中</strong>$\mathbb{E}</em>{q(x_t|x_0)}$<strong>与 VAE 一样，随机采样</strong>$x_t$<strong>即可，采样次数记为</strong>$L$<strong>次，经验上</strong>$L&#x3D;1$<strong>就可以了。</strong><br><strong>模型训练阶段前向过程和逆向过程都需要计算。</strong><br><strong>模型推理阶段，不需要前向过程，只需要逆向过程。</strong></p>
+<h2 id="图片生成-采样-过程"><a href="#图片生成-采样-过程" class="headerlink" title="图片生成 (采样) 过程"></a>图片生成 (采样) 过程</h2><p>训练完成的神经网络模型为$\hat{x}<em>\theta(x_t,t)$<strong>，</strong>输入$x_t$和$t$，输出是对$x_0$的预测值。<br>通过模型就可以得到$p(x</em>{t-1}|x_t)$的近似表示：$p(x_{t-1}|x_t)\sim\mathcal{N}(x_{t-1};\mu_q(x_t,x_0),\Sigma_q(t))$。<br>其中，<br>$\mu_q(x_t,x_0)&#x3D;\frac{\sqrt{\alpha_t}(1-\bar{\alpha}<em>{t-1})x_t+\sqrt{\bar{\alpha}</em>{t-1}}(1-\alpha_t)\hat{x}<em>\theta(x_t,t)}{1-\bar{\alpha}<em>t}$，<br>$\Sigma_q(t)&#x3D;\frac{(1-\alpha_t)(1-\bar{\alpha}</em>{t-1})}{1-\bar{\alpha}<em>t}I&#x3D;\sigma_q^2(t)I$。<br>逆向过程（采样过程）可以简述为：<br>1.设定$T&#x3D;1000$。<br>2.从一个标准高斯分布中采样得到$x_T$。<br>3.利用神经网络模型计算$\hat{x}<em>\theta(x_t,t)$。<br>4.计算$p(x</em>{t-1}|x_t)$的均值和方差。<br>5.从$p(x</em>{t-1}|x_t)$随机采样得到$x</em>{t-1}$。<br>6.重复 3~5 步，直到$t&#x3D;1$。</p>
+<h1 id="DDPM"><a href="#DDPM" class="headerlink" title="DDPM"></a>DDPM</h1><p>DDPM 对 DPM 做的关键改进就是参数化模型预测的内容做了调整：<br>不是预测原始的$x_0$，而是预测每一$t$添加的噪声。</p>
+<p>在 DPM 中有$D_{\mathrm{KL}}\left(q(x_{t-1}|x_t,x_0)|p_\theta(x_{t-1}|x_t)\right)&#x3D;\frac1{2\sigma_q^2(t)}\left[|\mu_\theta-\mu_q|<em>2^2\right]$，$\mu_q$代表逆过程真实分布$q(x</em>{t-1}|x_t,x_0)$的均值，$\mu_\theta$表示需要学习的近似逆过程分布$p_\theta(x_{t-1}|x_t)$的均值。<br><strong>根据上面由</strong>$x_t$<strong>反推</strong>$x_0$<strong>的式子重新对</strong>$\mu_q$<strong>进行推导：</strong><br>$\mu_q&#x3D;\frac1{\sqrt{\alpha_t}}x_t-\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}}\epsilon$</p>
+<p><strong>按照这个形式人为定义模型的预测输出</strong>$\mu_\theta$<strong>：</strong><br>$\mu_\theta&#x3D;\mu_\theta(x_t,t)&#x3D;\frac1{\sqrt{\alpha_t}}x_t-\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}<em>t}\sqrt{\alpha_t}}\hat{\epsilon}<em>\theta(x_t,t)$<br>在此基础上，重新计算$D</em>{\mathrm{KL}}\left(q(x</em>{t-1}|x_t,x_0)|p_\theta(x_{t-1}|x_t)\right)&#x3D;\frac1{2\sigma_q^2(t)}\frac{(1-\alpha_t)^2}{(1-\bar{\alpha}_t)\alpha_t}\left[\left|\epsilon-\hat{\epsilon}_\theta(x_t,t)\right|_2^2\right]$。</p>
+<p>$\hat{\epsilon}<em>\theta(x_t,t)$表示模型的预测输出。<br>$\mathbb{\epsilon}$表示从$t-1$到$t$过程中，添加到$x</em>{t-1}$的高斯噪声。<br>** 训练过程中，对于每一个时刻**$t$<strong>：</strong><br>**1.从标准高斯分布 **$\mathbb{\epsilon}$<strong>中随机采样一个噪声，不同</strong>$t$<strong>对应的</strong>$\mathbb{\epsilon}$<strong>是不同的。</strong><br><strong>2.代入</strong>$x_t&#x3D;\sqrt{\bar{\alpha}_t}\left.x_0+\sqrt{1-\bar{\alpha}_t}\right.\epsilon$<strong>计算得到</strong>$x_t$<strong>。</strong><br><strong>3.对神经网络模型输入</strong>$x_t$<strong>和</strong>$t$<strong>，模型输出</strong>$\hat{\epsilon}<em>\theta(x_t,t)$<strong>作为预测噪声。</strong><br><strong>4.最小化</strong>$\hat{\epsilon}<em>\theta(x_t,t)$<strong>与</strong>$\mathbb{\epsilon}$<strong>的平方误差。</strong><br><strong>有了</strong>$\hat{\epsilon}<em>\theta(x_t,t)$<strong>就可以求得</strong>$\mu_\theta$<strong>，从而求得</strong>$p_\theta(x</em>{t-1}|x_t)$<strong>。</strong><br><img src="https://cdn.nlark.com/yuque/0/2023/webp/35710960/1694614255390-3e4d4fcd-b60d-4019-bb04-222e7367533d.webp#averageHue=%23f3f3f3&clientId=ub7b9eba7-83be-4&from=paste&height=281&id=u4b5ffa74&originHeight=722&originWidth=2620&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u4be45c9b-7c84-4ec9-ac26-1851b4d01f6&title=&width=1018" srcset="/img/loading.gif" lazyload><img src="https://cdn.nlark.com/yuque/0/2023/webp/35710960/1694614264503-da915ac3-6573-4721-994f-01b48b6c8953.webp#averageHue=%23f3f3f3&clientId=ub7b9eba7-83be-4&from=paste&height=356&id=uf4edbeba&originHeight=495&originWidth=1400&originalType=url&ratio=1&rotation=0&showTitle=false&status=done&style=none&taskId=u92d41d6f-aa4b-48f6-a739-124af0e1681&title=&width=1008" srcset="/img/loading.gif" lazyload><br><strong>其中，</strong>$\beta_t&#x3D;1-\alpha_t$<strong>，</strong>$\sigma</em>{t}$<strong>是逆向过程分布</strong>$q(x</em>{t-1}|x_t,x_0)$<strong>的标准差。</strong></p>
+<h1 id="DDIM"><a href="#DDIM" class="headerlink" title="DDIM"></a>DDIM</h1><p>DDPM 中，生成过程被定义为马尔科夫扩散过程的反向过程，逆向过程的每一步都预测噪声。<br>DDIM 中，重新定义扩散过程和逆向过程。扩散过程不是完全遵循马尔科夫链，采用新的采样技巧，大幅减少采样步骤。代价是牺牲了一定的多样性和质量。</p>
+<h2 id="非马尔科夫前向过程"><a href="#非马尔科夫前向过程" class="headerlink" title="非马尔科夫前向过程"></a>非马尔科夫前向过程</h2><p>$q(x_{t-1}|x_t,x_0)$是条件概率分布，条件变量是$x_t$和$x_0$。<br>训练过程中，<br>$x_0$本身就是已知的。<br>$x_t$是利用线性高斯的特性，直接通过$q(x_t|x_0)$计算，而没有使用$q(x_t|x_{t-1})$，意味着$x_t$可以不依赖$x_{t-1}$。<br>那么$q(x_t|x_0)$是如何得到的，是在联合概率$q(x_{1:t}|x_0)$的基础上边际化（消除变量$x_{1:t-1}$）得到的：<br>$q(x_t|x_0)&#x3D;\int q(x_{1:t}|x_0)dx_{1:t-1}$<br>在 DDPM 中，对联合概率$q(x_{1:t})$的进一步分解是按照马尔科夫链的形式分解的，即：<br>$$\begin{aligned}<br>q(x_t|x_0)&amp; &#x3D;\int q(x_{1:t}|x_0)dx_{1:t-1}  \<br>&amp;&#x3D;\int\prod_{i&#x3D;1}^tq(x_i|x_{i-1})dx_{1:t-1}<br>\end{aligned}$$</p>
+<p><strong>引入一个人为定义的自由参数</strong>$\sigma^2$，表示$q(x_{t-1}|x_t,x_0)$的方差。<br><strong>重新定义</strong>$q(x_{1:T}|x_0)$<strong>的分解方式：</strong><br>$q_\sigma(x_{1:T}|x_0):&#x3D;q_\sigma(x_T|x_0)\prod_{t&#x3D;2}^Tq_\sigma(x_{t-1}|x_t,x_0)$<br>其中$q_\sigma(x_T|x_0)$与 DDPM 维持一致：<br>$q_\sigma(x_T|x_0)\sim\mathcal{N}(\sqrt{\bar{\alpha}<em>T}\left.x_0,(1-\bar{\alpha}<em>T)I\right)$<br>对任意$t&gt;1$，定义$q_\sigma(x</em>{t-1}|x_t,x_0)$分布为：<br><img src="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694666100971-b9a5a9e7-0304-404a-8863-e7d48937afbe.png#averageHue=%23f7f6f6&clientId=u46e69163-a816-4&from=paste&height=157&id=u54bb05a0&originHeight=196&originWidth=924&originalType=binary&ratio=1&rotation=0&showTitle=false&size=19610&status=done&style=none&taskId=ud7a95a21-6f36-4c0a-8858-cdb54e22c2a&title=&width=741" srcset="/img/loading.gif" lazyload alt="image.png|775"><br>看出，$q_\sigma(x</em>{t-1}|x_t,x_0)$仍是逆过程的转换核，$x_{t-1}$同时依赖$x_t$和$x_0$。<br>为什么要这么定义，这和 DDPM 中的形式也不一样，期望项中多了方差DPM<br><img src="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694666524794-1dbf95be-936a-4ad8-8e6d-00e460c7472f.png#averageHue=%23f9f9f9&clientId=u46e69163-a816-4&from=paste&height=189&id=uc9e4fa1e&originHeight=189&originWidth=938&originalType=binary&ratio=1&rotation=0&showTitle=false&size=27534&status=done&style=none&taskId=uadda1221-85fa-416c-b7b9-95d7c35b570&title=&width=938" srcset="/img/loading.gif" lazyload alt="image.png|800"><br>DDPM<br><img src="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694666539854-2a0801ca-d045-4588-8364-dd58477ccf1c.png#averageHue=%23f6f6f6&clientId=u46e69163-a816-4&from=paste&height=77&id=ua96b3c76&originHeight=77&originWidth=336&originalType=binary&ratio=1&rotation=0&showTitle=false&size=5418&status=done&style=none&taskId=u5eba644a-31fb-47b0-9791-436058172c8&title=&width=336" srcset="/img/loading.gif" lazyload alt="image.png|336"><br>DDIM<br>论文中有推导，附录 B<br>在 DPM 中，模型直接预测$x_0$进而得到了$q_\sigma(x_{t-1}|x_t,x_0)$的近似表示。<br>在 DDPM 中，利用$x_0&#x3D;\frac{x_t-\sqrt{1-\bar{\alpha}<em>t}\epsilon_t}{\sqrt{\bar{\alpha}<em>t}},\quad\epsilon_t\sim\mathcal{N}(0,I)$，让$x_t ，\epsilon</em>{t}$替代$x_0$，进而令模型预测$\epsilon_t$。<br>在 DDIM 中，$q_\sigma(x</em>{t-1}|x_t,x_0)$的期望又直接依赖$x_0$。<br><strong>为了能用上 DDPM 的模型（预测噪声</strong>$\hat{\epsilon}_t(x_t,t)$<strong>的模型），</strong>利用$x_0&#x3D;\frac{x_t-\sqrt{1-\bar{\alpha}_t}\epsilon_t}{\sqrt{\bar{\alpha}_t}}$得到预测的$\hat{x}<em>0$:<br>$\hat{x}<em>0&#x3D;f_\theta^{(t)}(x_t)&#x3D;\frac{x_t-\sqrt{1-\bar{\alpha}<em>t}\hat{\epsilon}<em>t(x_t,t)}{\sqrt{\bar{\alpha}<em>t}}$<br>由此，我们可以利用上已经训练好的 DDPM 模型$\hat{\epsilon}<em>t(x_t,t)$，不需要重新训练一个模型。<br>得到$\hat{x}<em>0$，再利用$q_\sigma(x</em>{t-1}|x_t,x_0)\sim\mathcal{N}\left(\sqrt{\bar{\alpha}</em>{t-1}}\left.x_0+\sqrt{1-\bar{\alpha}</em>{t-1}-\sigma_t^2}\cdot\frac{x_t-\sqrt{\bar{\alpha}<em>t}\left.x_0\right.}{\sqrt{1-\bar{\alpha}<em>t}},{\sigma_t^2I}\right)\right.$得到$q_\sigma(x</em>{t-1}|x_t,x_0)$的近似分布：<br>$$\begin{aligned}<br>p</em>{\theta,\sigma}(x</em>{t-1}|x_t)&amp; \sim\mathcal{N}\left(\sqrt{\bar{\alpha}</em>{t-1}}\left.\hat{x}<em>0+\sqrt{1-\bar{\alpha}</em>{t-1}-\sigma_t^2}\cdot\frac{x_t-\sqrt{\bar{\alpha}<em>t}\left.\hat{x}<em>0\right.}{\sqrt{1-\bar{\alpha}<em>t}},\sigma_t^2I\right)\right.   \<br>&amp;\approx q_\sigma(x</em>{t-1}|x_t,x_0)<br>\end{aligned}$$<br><strong>整理以上整个逆过程：</strong><br><strong>对于</strong>$x_T$<strong>:</strong><br>$p(x_T)&#x3D;\mathcal{N}(0,I)$<br><strong>对于</strong>$p(x</em>{t-1}|x_t)$<strong>：</strong><br>$p(x</em>{t-1}|x_t)&#x3D;\left{\begin{array}{ccc}&amp;\mathcal{N}(\hat{x}<em>0(x_1,t&#x3D;1),\sigma_1^2I<del>)&amp;\mathrm{</del>if~}&amp;t&#x3D;1\&amp;q_\sigma(x</em>{t-1}|x_t,\hat{x}<em>0(x_t,t))&amp;\mathrm{<del>if</del>}&amp;1&lt;t\leq T\end{array}\right.$<br><strong>根据</strong>$p</em>{\theta,\sigma}(x</em>{t-1}|x_t)\sim\mathcal{N}\left(\sqrt{\bar{\alpha}</em>{t-1}}\left.\hat{x}<em>0+\sqrt{1-\bar{\alpha}</em>{t-1}-\sigma_t^2}\cdot\frac{x_t-\sqrt{\bar{\alpha}_t}\left.\hat{x}_0\right.}{\sqrt{1-\bar{\alpha}<em>t}},\sigma_t^2I\right)\right.$<strong>，</strong>$x</em>{t-1}$<strong>具体采样公式：</strong><br><img src="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694670854027-8de1efea-f3e5-4648-b4f6-525080f2bc80.png#averageHue=%23f7f6f6&clientId=u46e69163-a816-4&from=paste&height=224&id=u6ef58cf8&originHeight=278&originWidth=1008&originalType=binary&ratio=1&rotation=0&showTitle=false&size=40564&status=done&style=none&taskId=u5fd0f062-aace-4dfc-9725-eb4a864e1e3&title=&width=811" srcset="/img/loading.gif" lazyload alt="image.png|775"></p>
+<h2 id="加速采样"><a href="#加速采样" class="headerlink" title="加速采样"></a>加速采样</h2><p>在 DDPM 中，方差是直接贝叶斯推导出来的：$\sigma^2&#x3D;\frac{(1-\alpha_t)(1-\bar{\alpha}<em>{t-1})}{1-\bar{\alpha}<em>t}$。<br>在 DDIM 中，方差是超参数，通过调整$\sigma^{2}$从而达到不一样的效果。<br>如果将$\sigma^{2}$调整为与 DDPM 一样的形式，那么 DDIM 就退化为 DDPM。<br><strong>DDIM 可以看作是 DDPM 的拓展，DDPM 是 DDIM 的特例。</strong><br>$\sigma^{2}$另一个特例是令$\sigma^{2}&#x3D;0$。<br>直接导致$x</em>{t-1}&#x3D;\sqrt{\bar{\alpha}</em>{t-1}}\underbrace{\left(\frac{x_t-\sqrt{1-\bar{\alpha}<em>t}\hat{\epsilon}<em>t(x_t,t)}{\sqrt{\bar{\alpha}<em>t}}\right)}</em>{\text{predict }x_0}+\underbrace{\sqrt{1-\bar{\alpha}</em>{t-1}-\sigma_t^2}\quad\hat{\epsilon}<em>t(x_t,t)}</em>{\text{direction pointing to }x_t}+\underbrace{\sigma_t\epsilon_t^*}</em>{\text{random noise}}$中的随机噪声$\sigma_t\epsilon_t^*$没了，$x_{t-1}$直接等于$q_\sigma(x_{t-1}|x_t,x_0)$的期望。<br><strong>从随机采样的角度，</strong>$x_{t-1}$不再是从$q_\sigma(x_{t-1}|x_t,x_0)$随机采样，而是直接选择其期望。<br>又由于$q_\sigma(x_{t-1}|x_t,x_0)$是高斯分布，其期望是概率密度的最大点。<br>相当于$x_{t-1}$每次都选取的$q_\sigma(x_{t-1}|x_t,x_0)$的最大值点，即最大概率采样。<br><strong>从数值计算角度，</strong>没了随机项，成了确定性计算，不再具有随机性。<br><strong>加速的原因：</strong><br><strong>当方差不是 0 的时候</strong>，$x_t$到$x_{t-1}$的每一步都是随机性采样。<br>相当于从$x_T$到$x_0$的每一步都不好好走，总在这个方向上加一个随机量，因此会走很多弯路，从而到达$x_0$的步数就变长了。<br><strong>方差为 0 时，</strong>$x_T$<strong>到</strong>$x_0$<strong>的每一步，都是沿着期望方向笔直前进，因此就快多了。</strong></p>
+<h2 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h2><p>如果$\sigma_t\neq0$，意味着保留了随机性，生成的多样性更好，但是收敛速度会下降。<br>反之，去掉随机项，收敛速度会加快，但是会损失多样性。<br>如果要兼顾速度和多样性，可以设计一个动态自适应的调度算法。<br>开始的一段时间，令$\sigma_t&#x3D;0$加快收敛速度。<br>最后一段时间，令$\sigma_t\neq0$增加多样性。可以线性控制也可以余弦控制。、</p>
+<h1 id="Score-based-DDPM"><a href="#Score-based-DDPM" class="headerlink" title="Score-based DDPM"></a>Score-based DDPM</h1><p><strong>Tweedie 公式。</strong><br>在统计学中，经常需要根据观察样本估计概率分布的未知参数，比如最大似然估计、贝叶斯估计等。<br>Tweedie 公式就可以用来估计高斯分布的均值参数。<br>假设有一个（多元）高斯随机变量$z\sim(\mathcal{N}z;\mu_z,\Sigma_z)$。<br><strong>Tweedie 公式可以写成</strong>：$\mathbb{E}[\mu_z|z]&#x3D;z+\Sigma_z\underbrace{\nabla_z\log p(z)}_{\mathrm{score}}$。<br>$\mathbb{E}[\mu_z|z]$表示有$z$样本条件下，$\mu_z$的期望，直观理解就是用$z$的样本估计$\mu_z$。<br>$\log p(z)$是观测样本的对数似然，$\nabla_z\log p(z)$是观测样本的对数似然的一阶导数，也可以称为梯度、Stein 分数。<br><strong>在前向过程中，</strong>$q(x_t|x_0)&#x3D;\mathcal{N}(x_t;\sqrt{\bar{\alpha}_t}x_0,(1-\bar{\alpha}_t)I)$<strong>。</strong><br>$q(x_t|x_0)$是高斯分布，均值是$\sqrt{\bar{\alpha}<em>t}x_0$。<br>可以利用 Tweedie 公式估计这个均值参数：$\sqrt{\bar{\alpha}<em>t}x_0&#x3D;\mathbb{E}\left[\mu</em>{x_t}|x_t\right]&#x3D;x_t+(1-\bar{\alpha}<em>t)\nabla</em>{x_t}\log p(x_t)$。<br>上面公式移项得到<strong>用分数表达</strong>$x_0$：$x_0&#x3D;\frac{x_t+(1-\bar{\alpha}<em>t)\nabla\log p(x_t)}{\sqrt{\bar{\alpha}<em>t}}$。<br><strong>逆过程中有真实分布</strong>$q(x</em>{t-1}|x_t,x_0)$<strong>的均值</strong>$\mu_q(x_t,x_0)&#x3D;\frac{\sqrt{\alpha_t}(1-\bar{\alpha}</em>{t-1})x_t+\sqrt{\bar{\alpha}</em>{t-1}}(1-\alpha_t)x_0}{1-\bar{\alpha}_t}$<strong>。</strong><br><strong>替换</strong>$x_0$<strong>得到：</strong>$\mu_q(x_t,x_0)&#x3D;\frac1{\sqrt{\alpha_t}}x_t+\frac{1-\alpha_t}{\sqrt{\alpha_t}}\nabla\log p(x_t)$<strong>。</strong></p>
+<p><strong>按照这个形式重新设定参数化分布</strong>$p_\theta(x_{t-1}|x_t)$<strong>的均值表达式：</strong>$\mu_\theta(x_t,t)&#x3D;\frac1{\sqrt{\alpha_t}}x_t+\frac{1-\alpha_t}{\sqrt{\alpha_t}}s_\theta(x_t,t)$<strong>。</strong><br><strong>现在</strong>$s_\theta(x_t,t)$<strong>是模型学习预测的内容，相当于模型预测的是分数</strong>$\nabla_{x_t}\log p(x_t)$<strong>。</strong><br><strong>重新推导 ELBO 函数中的 KL 散度：</strong><br>$\arg\min_\theta D_{\mathrm{KL}}\left(q(x_{t-1}|x_t,x_0)|p_\theta(x_{t-1}|x_t)\right)&#x3D;\arg\min_\theta\frac{1}{2\sigma_q^2(t)}\frac{(1-\alpha_t)^2}{\alpha_t}\Big[\left|s_\theta(x_t,t)-\nabla\log p(x_t)\right|_2^2\Big]$</p>
+<p>最后的目标函数依旧是均方误差的形式，和 DPM、DDPM 一致。<br>$\nabla\log p(x_t)$是梯度的真实值，可以直接通过 pytorch 计算得到。<br>$s_\theta(x_t,t)$代表神经网络模型，去学习和预测$\nabla\log p(x_t)$。<br>结合$x_0&#x3D;\frac{x_t-\sqrt{1-\bar{\alpha}_t}\left.\epsilon_t\right.}{\sqrt{\bar{\alpha}_t}}$和$x_0&#x3D;\frac{x_t+(1-\bar{\alpha}_t)\nabla\log p(x_t)}{\sqrt{\bar{\alpha}_t}}$可以得到$\nabla\log p(x_t)&#x3D;-\frac1{\sqrt{1-\bar{\alpha}_t}}\epsilon_t$。</p>
+<h1 id="扩散模型的三种形式"><a href="#扩散模型的三种形式" class="headerlink" title="扩散模型的三种形式"></a>扩散模型的三种形式</h1><p><strong>扩散模型有三种形式：</strong><br><strong>1.直接预测初始样本</strong><br><strong>2.预测噪声</strong><br><strong>3.预测分数</strong><br>逆过程中真实后验分布为$q(x_{t-1}|x_t,x_0)$。<br>这是一个高斯分布，$q(x_{t-1}|x_t,x_0)\sim\mathcal{N}(x_{t-1},\mu_q,\Sigma_{q(t)})$，均值记为$\mu_q$，方差记为$\Sigma_{q(t)}$。<br>方差看做已知的常量：$\Sigma_q(t)&#x3D;\frac{(1-\alpha_t)(1-\bar{\alpha}<em>{t-1})}{1-\bar{\alpha}<em>t}I&#x3D;\sigma_q^2(t)I$。<br>参数化模型学习的分布记为$p_\theta(x</em>{t-1}|x_t)$。<br>要令$p_\theta(x</em>{t-1}|x_t)$尽量近似真实分布$q(x_{t-1}|x_t,x_0)$，那么模型学习拟合的均值$\mu_q$可以推导出三种形式，对应三种学习方式。</p>
+<h2 id="学习初始样本"><a href="#学习初始样本" class="headerlink" title="学习初始样本"></a>学习初始样本</h2><p>$\mu_q(x_t,x_0)&#x3D;\frac{\sqrt{\alpha_t}(1-\bar{\alpha}<em>{t-1})x_t+\sqrt{\bar{\alpha}</em>{t-1}}(1-\alpha_t)x_0}{1-\bar{\alpha}<em>t}$<br>$\mu_\theta&#x3D;\mu_\theta(x_t,t)&#x3D;\frac{\sqrt{\alpha_t}(1-\bar{\alpha}</em>{t-1})x_t+\sqrt{\bar{\alpha}_{t-1}}(1-\alpha_t)\hat{x}_\theta(x_t,t)}{1-\bar{\alpha}_t}$<br>这种方式学习的是初始样本$x_0$，对模型来说难度较大，效果不突出。</p>
+<h2 id="学习噪声"><a href="#学习噪声" class="headerlink" title="学习噪声"></a>学习噪声</h2><p>$\mu_q(x_t,x_0)&#x3D;\frac1{\sqrt{\alpha_t}}x_t-\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}}\epsilon$<br>按照这个形式设定参数化分布的均值$\mu_\theta$：<br>$\mu_\theta&#x3D;\mu_\theta(x_t,t)&#x3D;\frac1{\sqrt{\alpha_t}}x_t-\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}}\hat{\epsilon}_\theta(x_t,t)$<br>这种方式预测的是噪声$\epsilon$，模型效果提升很大。</p>
+<h2 id="学习分数"><a href="#学习分数" class="headerlink" title="学习分数"></a>学习分数</h2><p>$\mu_q(x_t,x_0)&#x3D;\frac1{\sqrt{\alpha_t}}x_t+\frac{1-\alpha_t}{\sqrt{\alpha_t}}\nabla\log p(x_t)$<br>按照这个形式设定参数化分布的均值$\mu_\theta$：<br>$\mu_q(x_t,x_0)&#x3D;\frac1{\sqrt{\alpha_t}}x_t+\frac{1-\alpha_t}{\sqrt{\alpha_t}}s_\theta(x_t,t)$<br>这种方式预测的是分数（梯度）$\nabla\log p(x_t)$。<br>相比于学习噪声，可以在逆过程采样图片时采用基于分数的采样算法，基于分数的采样算法种类很多，从而增大了算法灵活性。</p>
+<h1 id="Guided-Diffusion"><a href="#Guided-Diffusion" class="headerlink" title="Guided Diffusion"></a>Guided Diffusion</h1><p>DDPM 和 DDIM 生成图片时，都是输入一个随机高斯噪声，然后逐步生成真实图片。<br>这个过程中的每一步都是随机的，所以生成的图片多样性很好。<br>缺点就是生成图像不可控，无法控制生成过程。<br>直觉上讲，可以在扩散过程中<strong>引入额外的信息来指导扩散模型</strong>。<br>假设这个额外的信息为$y$，可以是文本、图片、标签等。<br><strong>引入</strong>$y$<strong>后，模型就变成了一个以</strong>$y$<strong>为条件的概率分布：</strong>$p(x_{1:T}|y,x_0)$<strong>。</strong><br><strong>接下来需要分析引入</strong>$y$<strong>后对扩散过程和逆向过程有什么影响，需要做什么调整。</strong><br><strong>对于扩散过程，引入</strong>$y$<strong>没有产生任何影响。</strong><br><strong>那么，重点将是</strong>$y$<strong>对逆向过程的影响。</strong><br>原始的无条件扩散模型的逆向过程联合概率分布为：$p(x_{0:T})&#x3D;p(x_T)\prod_{t&#x3D;1}^Tp_\theta(x_{t-1}|x_t)$。<br>添加$y$后，逆向联合概率分布为：$p(x_{0:T}|y)&#x3D;p(x_T)\prod_{t&#x3D;1}^Tp_\theta(x_{t-1}|x_t,y)$。</p>
+<h2 id="Classifier-Guidance"><a href="#Classifier-Guidance" class="headerlink" title="Classifier Guidance"></a>Classifier Guidance</h2><p>扩散模型的降噪过程可以从三种角度理解。<br>其中一种是神经网络去预测$x_t$的对数梯度：$\hat{s}<em>\theta(x_t,t)\approx\nabla</em>{x_t}\log p(x_t)$。<br>引入条件$y$后，由原来的$\nabla_{x_t}\log p(x_t)$变成$\nabla_{x_t}\log p(x_t|y)$。<br>推导出：$\nabla_{x_t}\log p(x_t|y)&#x3D;\underbrace{\nabla_{x_t}\log p(x_t)}<em>\text{unconditional score}+\underbrace{\nabla</em>{x_t}\log p(y|x_t)}_\text{adversarial gradient}$</p>
+<p><strong>第一项</strong>$\nabla_{x_t}\log p(x_t)$<strong>是无条件扩散模型的梯度，称为无条件分数。</strong><br><strong>第二项</strong>$\nabla_{x_t}\log p(y|x_t)$<strong>称为对抗梯度。</strong><br>其中，$p(y|x_t)$代表一个<strong>分类器，</strong>$x_t$<strong>是分类器的输入，</strong>$y$<strong>是分类器预测的标签。</strong><br><strong>综合一下，条件扩散模型的分数就是在非条件扩散模型分数的基础上加了一项分类器的对抗梯度。</strong><br><strong>分类器</strong>$p(y|x_t)$<strong>的输入不是初始图像</strong>$x_0$<strong>，而是加了噪声的</strong>$x_t$<strong>。</strong><br><strong>分类器需要在训练条件扩散模型前，独立训练好。</strong><br>在训练分类器时，需要用扩散模型的前向加噪过程得到$x_t$作为分类器的输入，在实现时：<br>1.预训练好一个噪声分类器$p(y|x_t)$<br>2.在原来非条件扩散模型的每一时刻$t$的采样过程中：<br>1.把模型的预测输出$\hat{s}<em>\theta(x_t,t)$<br>2.同时把$x_t$输入到预训练好的噪声分类器$p(y|x_t)$，并计算出梯度$\nabla</em>{x_t}\log p(y|x_t)$<strong>。</strong><br>3.计算$\hat{s}<em>\theta(x_t,t,y)&#x3D;\hat{s}<em>\theta(x_t,t)+\nabla</em>{x_t}\log p(y|x_t)$。<br>4.继续原来的处理<br>噪声分类器的对抗梯度$\nabla</em>{x_t}\log p(y|x_t)$影响采样降噪过程，让采样向着类别标签$y$的方向前进，进而得到贴近标签$y$的图像。<br><strong>classifier guidance 会让生成图像质量提高，但是会降低其多样性。</strong><br><strong>为了更灵活控制生成内容的方向，增加了一个超参数</strong>$\text{λ}$<strong>，作为权重项。</strong><br>这个权重可以调节类别引导的作用大小：$\nabla_{x_t}\log p(x_t|y)&#x3D;\nabla_{x_t}\log p(x_t)+\lambda\nabla_{x_t}\log p(y|x_t)$。<br><img src="https://cdn.nlark.com/yuque/0/2023/png/35710960/1694711233805-fffa8380-cd45-4d7f-b84d-d9ffe4b0ea55.png#averageHue=%23f6f5f4&clientId=u44e270e5-ffc9-4&from=paste&height=961&id=u0fb10426&originHeight=961&originWidth=1611&originalType=binary&ratio=1&rotation=0&showTitle=false&size=214862&status=done&style=none&taskId=uc3059a0d-6c9c-4bda-a1d1-da4738bfbf2&title=&width=1611" srcset="/img/loading.gif" lazyload alt="image.png"><br><strong>classifier guidance 缺点明显：</strong><br>1.需要额外一个分类器模型，极大增加了成本，包括训练成本和采样成本。<br>2.分类器的类别毕竟是有限集，不能涵盖全部情况，对于没有覆盖的标签类别会很不友好。<br>3.分类器和扩散模型是分开训练的，不利于进一步扩展模型的规模。<br>4.输入$x_t$中大多信息与$y$无关。</p>
+<h2 id="Classifier-free-guidance"><a href="#Classifier-free-guidance" class="headerlink" title="Classifier-free guidance"></a>Classifier-free guidance</h2><p>Classifier Guidance 使用显式的分类器引导条件生成。<br>Classifier-free Guidance 的核心是使用隐式分类器，无需直接计算显示分类器及其梯度。<br>在Classifier Guidance $\nabla_{x_t}\log p(x_t|y)&#x3D;\underbrace{\nabla_{x_t}\log p(x_t)}<em>\text{unconditional score}+\underbrace{\nabla</em>{x_t}\log p(y|x_t)}<em>\text{adversarial gradient}$基础上稍微变换一下：<br>$\nabla</em>{x_t}\log p(y|x_t)&#x3D;\nabla_{x_t}\log p(x_t|y)-\nabla_{x_t}\log p(x_t)$。<br><strong>根据贝叶斯公式，分类器的梯度可以用条件生成概率和无条件生成概率表示：</strong><br>$$\begin{aligned}<br>\nabla_{\mathbf{x}<em>{t}}\log p\left(y\mid\mathbf{x}</em>{t}\right)&amp; &#x3D;\nabla_{\mathbf{x}_t}\log p\left(\mathbf{x}<em>t\mid y\right)-\nabla</em>{\mathbf{x}_t}\log p\left(\mathbf{x}_t\right)  \<br>&amp;&#x3D;-\frac1{\sqrt{1-\bar{\alpha}_t}}(\boldsymbol{\epsilon}_\theta\left(\mathbf{x}_t,t,y\right)-\boldsymbol{\epsilon}_\theta\left(\mathbf{x}_t,t\right))<br>\end{aligned}$$<br><strong>在Classifier Guidance：</strong>$\begin{aligned}\hat{\epsilon}_\theta(x_t|y)&#x3D;\epsilon_\theta(x_t|\emptyset)-\sqrt{1-\bar{\alpha}<em>t}\nabla</em>{x_t}\log p_\phi(y|x_t)\end{aligned}$<strong>。</strong><br><strong>代入其中得到classifier-free guidance：</strong>$\hat{\epsilon}_\theta(x_t|y)&#x3D;\epsilon_\theta\left(\mathbf{x_t}\mid\emptyset\right)+\gamma\cdot\left(\epsilon_\theta\left(\mathbf{x_t}\mid\mathbf{y}\right)-\epsilon_\theta\left(\mathbf{x_t}\mid\emptyset\right)\right)$<br>为了在 classifier-free guidance 中使用通用文本 prompts，在训练中有时会将文本替换成空序列$\emptyset$。<br>$\gamma&#x3D;0$时为无条件模型，$\gamma&#x3D;1$时为标准的条件概率模型。<br><strong>看出，新的生成过程不再依赖显式的分类器 classifier。</strong><br><strong>训练时，classifier-free guidance 需要训练两个模型，一个是无条件生成，一个是条件生成。</strong><br><strong>通过以一定概率将条件置空即可在一个模型中表示。</strong><br><strong>推理时，最终结果可以由条件生成和无条件生成的线性外推获得。</strong><br><strong>生成效果可以引导系数可以调节，控制生成样本的逼真性和多样性的平衡。</strong></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/diffusers">https://github.com/huggingface/diffusers</a> 开源代码</li>
+<li><a target="_blank" rel="noopener" href="https://www.zhangzhenhu.com/aigc/%E6%89%A9%E6%95%A3%E6%A6%82%E7%8E%87%E6%A8%A1%E5%9E%8B.html">张振虎 - DPM DDPM</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhangzhenhu.com/aigc/ddim.html">张振虎 - DDIM</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhangzhenhu.com/aigc/Guidance.html">张振虎 - 条件控制扩散模型</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhangzhenhu.com/aigc/Score-Based_Generative_Models.html">张振虎 - 基于分数的生成模型</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/569700320">知乎 - 扩散模型笔记5 classifier-free guidance</a></li>
+<li><a target="_blank" rel="noopener" href="https://sunlin-ai.github.io/2022/06/01/Classifier-Free-Diffusion.html">[论文理解] Classifier-Free Diffusion Guidance</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/640631667">知乎 - 通俗理解Classifier Guidance 和 Classifier-Free Guidance 的扩散模型</a></li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%AD%A6%E4%B9%A0/" class="category-chain-item">学习</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【学习】扩散模型缩减版</div>
+      <div>http://example.com/2023/01/02/【学习】扩散模型缩减版/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年1月2日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/06/28/%E9%9F%A9%E9%A1%BA%E5%B9%B3JAVA/" title="java学习日志">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">java学习日志</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/01/02/%E3%80%90%E5%AD%A6%E4%B9%A0%E3%80%91%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E8%AF%A6%E7%BB%86%E7%89%88/" title="【学习】扩散模型详细版">
+                        <span class="hidden-mobile">【学习】扩散模型详细版</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
