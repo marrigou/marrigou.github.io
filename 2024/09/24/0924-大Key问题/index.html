@@ -16,19 +16,23 @@
   <meta name="author" content="Marigo">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="article">
-<meta property="og:title" content="【学习】算法-动态规划">
-<meta property="og:url" content="http://example.com/2024/09/14/%E3%80%90%E5%AD%A6%E4%B9%A0%E3%80%91%E7%AE%97%E6%B3%95-%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/index.html">
+    <meta name="description" content="大Key指的是在键值对数据库（如 Redis 等)中，某个键对应的数据量非常大，通常包括：  字符串大Key：单个字符串键的长度非常大。 集合大Key：某个键对应的集合（如 list、set、hash）包含了大量的元素。  大Key会带来以下几个问题：  操作耗时：对大Key的读写操作（如GET、SET、HGETALL等）需要大量的网络带宽，导致操作耗时较长。特别是在主从同步时，大Key的复制可能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【学习】大Key问题">
+<meta property="og:url" content="http://example.com/2024/09/24/0924-%E5%A4%A7Key%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="大Key指的是在键值对数据库（如 Redis 等)中，某个键对应的数据量非常大，通常包括：  字符串大Key：单个字符串键的长度非常大。 集合大Key：某个键对应的集合（如 list、set、hash）包含了大量的元素。  大Key会带来以下几个问题：  操作耗时：对大Key的读写操作（如GET、SET、HGETALL等）需要大量的网络带宽，导致操作耗时较长。特别是在主从同步时，大Key的复制可能">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-09-13T16:00:00.000Z">
-<meta property="article:modified_time" content="2024-09-14T12:24:15.079Z">
+<meta property="og:image" content="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/Redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F.svg">
+<meta property="article:published_time" content="2024-09-24T07:03:01.617Z">
+<meta property="article:modified_time" content="2024-09-24T07:03:28.136Z">
 <meta property="article:author" content="Marigo">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/Redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F.svg">
   
   
   
-  <title>【学习】算法-动态规划 - Hexo</title>
+  <title>【学习】大Key问题 - Hexo</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -194,7 +198,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="【学习】算法-动态规划"></span>
+            <span id="subtitle" data-typed-text="【学习】大Key问题"></span>
           
         </div>
 
@@ -205,8 +209,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2024-09-14 00:00" pubdate>
-          2024年9月14日 凌晨
+        <time datetime="2024-09-24 15:03" pubdate>
+          2024年9月24日 下午
         </time>
       </span>
     
@@ -217,7 +221,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          0 字
+          1.6k 字
         
       </span>
     
@@ -228,7 +232,7 @@
         
         
         
-          1 分钟
+          14 分钟
         
       </span>
     
@@ -265,12 +269,66 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">【学习】算法-动态规划</h1>
+            <h1 id="seo-header">【学习】大Key问题</h1>
             
             
               <div class="markdown-body">
                 
-                
+                <p><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/Redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F.svg" srcset="/img/loading.gif" lazyload alt="Redis集群模式.svg"><br><strong>大Key</strong>指的是在键值对数据库（如 Redis 等)中，某个键对应的数据量非常大，通常包括：</p>
+<ul>
+<li><strong>字符串大Key</strong>：单个字符串键的长度非常大。</li>
+<li><strong>集合大Key</strong>：某个键对应的集合（如 list、set、hash）包含了大量的元素。</li>
+</ul>
+<p>大Key会带来以下几个问题：</p>
+<ol>
+<li><strong>操作耗时</strong>：对大Key的读写操作（如<code>GET</code>、<code>SET</code>、<code>HGETALL</code>等）需要大量的网络带宽，导致操作耗时较长。特别是在主从同步时，大Key的复制可能耗费大量时间和资源，甚至阻塞其他命令。</li>
+<li><strong>阻塞问题</strong>：Redis 是单线程的，如果某个大Key需要进行处理（如删除、遍历、复制等），可能导致Redis的整体服务阻塞，影响其他请求。</li>
+<li><strong>内存分配问题</strong>：存储大Key时，Redis 需要一次性分配大量内存，如果没有合理的内存分配策略，可能会导致内存碎片化，影响性能。</li>
+<li><strong>内存限制</strong>：大Key容易占用大量内存，特别是在高并发场景下，如果多个客户端同时访问和操作大Key，可能会导致 Redis 的内存爆满，从而触发 OOM。</li>
+</ol>
+<h3 id="分片处理策略"><a href="#分片处理策略" class="headerlink" title="分片处理策略"></a>分片处理策略</h3><p><strong>分片（Sharding）</strong> 是处理大Key的一种常用策略，特别是在分布式数据库或缓存中，分片可以将数据按一定规则分布到多个节点上，减少单个节点的负担，提升系统的可扩展性和性能。</p>
+<h4 id="1-如何知道有多少片？"><a href="#1-如何知道有多少片？" class="headerlink" title="1. 如何知道有多少片？"></a>1. 如何知道有多少片？</h4><p>分片的数量和划分策略通常取决于具体的实现和设计目标，分片数量可以根据以下方式确定：</p>
+<ul>
+<li><strong>静态分片</strong>：事先根据集群规模和数据量<font color="#974806">设置固定数量的分片</font>。例如，Redis Cluster 使用<strong>哈希槽</strong>机制，共有16384个哈希槽，数据按哈希槽分布到不同的节点上。<ul>
+<li><strong>动态分片</strong>：根据数据的实际增长情况，<font color="#974806">自动调整分片数量</font>。这通常适用于可扩展的系统，可以随着数据规模和负载的增加进行动态扩展。比如一些 NoSQL 数据库会根据节点负载情况进行自动分片和重分配。</li>
+</ul>
+</li>
+<li><strong>一致性哈希（Consistent Hashing）</strong>：使用一致性哈希算法将数据分布到不同的节点上。一致性哈希可以很好地支持动态扩展，当增加或减少节点时，只需要对少量数据进行重新分片。Kafka、Cassandra 等使用一致性哈希进行分片管理。<br>分片数量的决定可以通过分析系统的负载、内存占用和节点的容量来进行。如果系统允许动态扩展，分片数量可以随着数据规模增加而增长。</li>
+</ul>
+<h4 id="2-如何保证数据写入所有分片成功？"><a href="#2-如何保证数据写入所有分片成功？" class="headerlink" title="2. 如何保证数据写入所有分片成功？"></a>2. 如何保证数据写入所有分片成功？</h4><p>要确保分片后的数据写入成功，通常可以采取以下策略：</p>
+<h5 id="（1）多副本（Replication）"><a href="#（1）多副本（Replication）" class="headerlink" title="（1）多副本（Replication）"></a>（1）多副本（Replication）</h5><p>大多数分布式系统会<font color="#974806">使用数据副本来增加写入的可靠性</font>，即每个分片会有多个副本，写入操作需要在多个副本上成功后才能确认数据写入完成。例如：</p>
+<ul>
+<li><strong>Redis Sentinel</strong>：Redis 的高可用方案，通过配置主从复制（Replication）来保证数据的持久性。如果主节点故障，可以自动将从节点提升为主节点。<ul>
+<li><strong>Redis Cluster</strong>：通过分片管理，每个分片（Slot）可以有多个副本。写入时，通常要求在主节点写入成功，并且将数据复制到从节点。</li>
+</ul>
+</li>
+<li><strong>Kafka 的 ISR（In-Sync Replicas）机制</strong>：写入消息到 Kafka 时，只有当所有同步副本（ISR）都成功接收到消息后，才会返回确认，保证数据写入可靠。</li>
+</ul>
+<h5 id="（2）分布式事务或两阶段提交（2PC）"><a href="#（2）分布式事务或两阶段提交（2PC）" class="headerlink" title="（2）分布式事务或两阶段提交（2PC）"></a>（2）分布式事务或两阶段提交（2PC）</h5><p>为了保证数据写入多个分片的原子性，可以使用分布式事务或两阶段提交协议（2PC，Two-Phase Commit）：</p>
+<ul>
+<li><strong>准备阶段（Prepare Phase）</strong>：在所有分片上预写入数据，记录下准备状态，但还未提交。</li>
+<li><strong>提交阶段（Commit Phase）</strong>：如果所有分片都准备完毕，则提交数据；否则，执行回滚操作。<br>这种方式能确保数据一致性，但性能会有所影响，尤其是在跨多个分片写入时。</li>
+</ul>
+<h5 id="（3）强一致性机制（强一致写入）"><a href="#（3）强一致性机制（强一致写入）" class="headerlink" title="（3）强一致性机制（强一致写入）"></a>（3）强一致性机制（强一致写入）</h5><p>一些分布式系统会提供强一致性写入机制，如：</p>
+<ul>
+<li><strong>Quorum写入</strong>：确保写操作至少在大多数副本上写入成功。例如在Cassandra、HBase等系统中，使用<code>W = Quorum</code>的策略，即大多数节点确认写入后，认为操作成功。</li>
+<li><strong>事务性操作</strong>：在 Redis 中，虽然分片后不直接支持分布式事务，但可以通过 Lua 脚本确保同一事务内操作的原子性。对于分布式系统，系统级的事务性操作可以确保多个分片写入成功。</li>
+</ul>
+<h5 id="（4）回调检查与补偿机制"><a href="#（4）回调检查与补偿机制" class="headerlink" title="（4）回调检查与补偿机制"></a>（4）回调检查与补偿机制</h5><p>可以在写入后使用异步回调或日志补偿机制进行确认：</p>
+<ul>
+<li><strong>回调机制</strong>：写入分片后，通过回调机制检查每个分片的写入状态。如果有某个分片写入失败，可以通过回调机制重试写入操作。<ul>
+<li><strong>补偿机制</strong>：通过定时检查写入日志（或使用WAL日志）来检查分片数据的写入状态。如果发现某些分片的数据不一致，可以重新同步或补偿数据。</li>
+</ul>
+</li>
+</ul>
+<h3 id="三、示例：Redis-Cluster的写入与分片"><a href="#三、示例：Redis-Cluster的写入与分片" class="headerlink" title="三、示例：Redis Cluster的写入与分片"></a>三、示例：Redis Cluster的写入与分片</h3><p>以 Redis Cluster 为例，它使用<strong>哈希槽（hash slot）</strong>进行数据分片：</p>
+<ol>
+<li>Redis Cluster 会将数据分成 16384 个哈希槽，每个 key 的哈希值根据<code>CRC16</code>算法计算，并取模 16384 来确定数据属于哪个哈希槽。</li>
+<li>集群中的每个节点负责一定数量的哈希槽。当需要扩展集群时，可以增加节点，并将哈希槽重新分配到新的节点上。</li>
+<li>在写入时，数据首先写入到主节点，并同步复制到从节点。如果主节点故障，从节点可以自动接管。</li>
+<li><font color="#974806">Redis Cluster 的写入操作默认只确认主节点写入成功即可</font>，但为了提高可靠性，可以通过配置<code>wait</code>命令，确保数据<font color="#974806">被写入指定数量的副本后才返回确认</font>。</li>
+</ol>
+
                 
               </div>
             
@@ -308,8 +366,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>【学习】算法-动态规划</div>
-      <div>http://example.com/2024/09/14/【学习】算法-动态规划/</div>
+      <div>【学习】大Key问题</div>
+      <div>http://example.com/2024/09/24/0924-大Key问题/</div>
     </div>
     <div class="license-meta">
       
@@ -321,7 +379,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2024年9月14日</div>
+          <div>2024年9月24日</div>
         </div>
       
       
@@ -353,18 +411,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2024/09/14/%E3%80%90%E5%AD%A6%E4%B9%A0%E3%80%91%E7%AE%97%E6%B3%95-%E5%9B%BE%E8%AE%BA/" title="【学习】算法-图论">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">【学习】算法-图论</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2024/09/14/%E3%80%90%E5%AD%A6%E4%B9%A0%E3%80%91%E7%AE%97%E6%B3%95-%E5%AD%97%E7%AC%A6%E4%B8%B2/" title="【学习】算法-字符串">
-                        <span class="hidden-mobile">【学习】算法-字符串</span>
+                      <a href="/2024/09/24/0924-redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F/" title="【学习】Redis的集群模式">
+                        <span class="hidden-mobile">【学习】Redis的集群模式</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
