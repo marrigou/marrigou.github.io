@@ -1,0 +1,707 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20240618033026.png">
+  <link rel="icon" href="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/20240618033026.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="哨兵模式的启用哨兵模式需要配置Redis的主从复制（master-slave）架构，并通过哨兵（Sentinel）进行故障监控和自动主从切换。 1. 配置主从节点首先，配置Redis主从复制架构。  在主节点的redis.conf中，保持默认配置，主节点不需要额外的配置。 在从节点的redis.conf文件中，添加以下内容来指定它从哪个主节点复制数据：1replicaof &lt;master-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【学习】Redis的集群模式">
+<meta property="og:url" content="http://example.com/2024/09/24/0924-redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="哨兵模式的启用哨兵模式需要配置Redis的主从复制（master-slave）架构，并通过哨兵（Sentinel）进行故障监控和自动主从切换。 1. 配置主从节点首先，配置Redis主从复制架构。  在主节点的redis.conf中，保持默认配置，主节点不需要额外的配置。 在从节点的redis.conf文件中，添加以下内容来指定它从哪个主节点复制数据：1replicaof &lt;master-">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/Redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F.svg">
+<meta property="article:published_time" content="2024-09-24T06:34:06.119Z">
+<meta property="article:modified_time" content="2024-09-24T06:34:43.812Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/Redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F.svg">
+  
+  
+  
+  <title>【学习】Redis的集群模式 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 25vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Marigo&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="【学习】Redis的集群模式"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-09-24 14:34" pubdate>
+          2024年9月24日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          12 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">【学习】Redis的集群模式</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><img src="https://obsidian-1315850689.cos.ap-nanjing.myqcloud.com/obsidian/pic/Redis%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F.svg" srcset="/img/loading.gif" lazyload alt="Redis集群模式.svg"></p>
+<h2 id="哨兵模式的启用"><a href="#哨兵模式的启用" class="headerlink" title="哨兵模式的启用"></a>哨兵模式的启用</h2><p>哨兵模式需要配置Redis的主从复制（master-slave）架构，并通过哨兵（Sentinel）进行故障监控和自动主从切换。</p>
+<h4 id="1-配置主从节点"><a href="#1-配置主从节点" class="headerlink" title="1. 配置主从节点"></a>1. <strong>配置主从节点</strong></h4><p>首先，配置Redis主从复制架构。</p>
+<ul>
+<li>在主节点的<code>redis.conf</code>中，保持默认配置，主节点不需要额外的配置。</li>
+<li>在从节点的<code>redis.conf</code>文件中，添加以下内容来指定它从哪个主节点复制数据：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">replicaof &lt;master-ip&gt; &lt;master-port&gt;<br></code></pre></td></tr></table></figure>
+重启Redis从节点来生效配置。</li>
+</ul>
+<h4 id="2-配置哨兵（Sentinel）"><a href="#2-配置哨兵（Sentinel）" class="headerlink" title="2. 配置哨兵（Sentinel）"></a>2. <strong>配置哨兵（Sentinel）</strong></h4><p>哨兵是一个独立的进程，可以监控Redis实例。每个哨兵实例都需要一个配置文件，例如<code>sentinel.conf</code>。</p>
+<ul>
+<li>创建并编辑<code>sentinel.conf</code>文件，主要配置如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">port 26379  <span class="hljs-comment"># 哨兵运行的端口</span><br>sentinel monitor mymaster 192.168.1.100 6379 2<br>sentinel down-after-milliseconds mymaster 5000<br>sentinel failover-timeout mymaster 10000<br>sentinel parallel-syncs mymaster 1<br></code></pre></td></tr></table></figure>
+其中：<ul>
+<li><code>mymaster</code> 是对主节点的逻辑名称，可以自定义。</li>
+<li><code>192.168.1.100 6379</code> 是主节点的IP和端口。</li>
+<li><code>2</code> 是投票同意将主节点标记为失效（fail）的最小哨兵数量。</li>
+<li><code>down-after-milliseconds</code> 是多长时间后判定主节点为不可用。</li>
+<li><code>failover-timeout</code> 是故障切换超时。</li>
+<li><code>parallel-syncs</code> 是在故障转移期间允许同时与新的主节点同步的从节点数量。</li>
+</ul>
+</li>
+<li>启动哨兵：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">redis-sentinel /path/to/sentinel.conf<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="3-添加多个哨兵节点"><a href="#3-添加多个哨兵节点" class="headerlink" title="3. 添加多个哨兵节点"></a>3. <strong>添加多个哨兵节点</strong></h4><p>为了提高可靠性，通常会运行多个哨兵实例。每个哨兵监控相同的主节点和从节点，它们之间通过Gossip协议交换信息，以达成共识并进行主从切换。<br>你只需要复制<code>sentinel.conf</code>并修改<code>port</code>，然后启动多个哨兵。</p>
+<h4 id="4-哨兵监控和自动故障转移"><a href="#4-哨兵监控和自动故障转移" class="headerlink" title="4. 哨兵监控和自动故障转移"></a>4. <strong>哨兵监控和自动故障转移</strong></h4><p>哨兵会不断监控主从节点的状态。当主节点不可用时，哨兵会通过<font color="#974806">选举机制</font>选择一个新的主节点（从现有的从节点中挑选），并通知其他从节点去复制新的主节点。此过程是自动的，客户端也可以通过哨兵获取新的主节点地址。</p>
+<h2 id="哨兵模式的选举机制"><a href="#哨兵模式的选举机制" class="headerlink" title="哨兵模式的选举机制"></a>哨兵模式的选举机制</h2><p>在Redis哨兵（Sentinel）模式中，当主节点（master）发生故障时，哨兵通过选举机制将某个从节点（slave）提升为新的主节点。这个过程被称为<strong>故障转移（failover）</strong>，具体来说，哨兵按照一系列标准来确定哪个从节点应当被提升为主节点。</p>
+<p>以下是哨兵如何选择从节点来提升为主节点的步骤和规则：</p>
+<h3 id="哨兵选举从节点为新主节点的标准"><a href="#哨兵选举从节点为新主节点的标准" class="headerlink" title="哨兵选举从节点为新主节点的标准"></a>哨兵选举从节点为新主节点的标准</h3><ol>
+<li><strong>可用性检查</strong><ul>
+<li>哨兵首先确保某个从节点是<font color="#974806">在线并且可以正常通信的</font>。只有那些能够与哨兵正常交互的从节点才会被考虑作为新的主节点。</li>
+</ul>
+</li>
+<li><strong>优先级（priority）</strong><ul>
+<li>每个从节点有一个<code>replica-priority</code>参数，<font color="#974806">数值越小优先级越高</font>。在故障转移过程中，优先级高的从节点会优先被提升为主节点。</li>
+<li>你可以在Redis从节点的配置文件中通过<code>replica-priority</code>参数配置其优先级。例如：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">replica-priority 100<br></code></pre></td></tr></table></figure>
+一个优先级为<code>0</code>的从节点永远不会被提升为主节点。</li>
+</ul>
+</li>
+<li><strong>复制偏移量（replication offset）</strong><ul>
+<li><font color="#974806">如果多个从节点的优先级相同，哨兵会选择数据最完整的从节点，即复制偏移量最大的那个节点</font>。</li>
+<li>复制偏移量是从节点成功复制主节点数据的进度，复制偏移量越大，说明该从节点的同步数据越接近最新状态。因此哨兵会优先选择数据同步最新的从节点。</li>
+</ul>
+</li>
+<li><strong>从节点的“断开时间”</strong><ul>
+<li>如果从节点的优先级和复制偏移量相同，哨兵会选择<font color="#974806">离主节点断开时间最短</font>的从节点进行提升。也就是说，哨兵会选择最近还保持着良好连接的从节点。</li>
+</ul>
+</li>
+<li><strong>哨兵的随机选择</strong><ul>
+<li>如果所有上述条件都相同，哨兵将会在满足条件的从节点中随机挑选一个作为新的主节点。</li>
+</ul>
+</li>
+</ol>
+<h2 id="故障转移的流程"><a href="#故障转移的流程" class="headerlink" title="故障转移的流程"></a>故障转移的流程</h2><ol>
+<li><strong>主节点失效（Failover）检测</strong><ul>
+<li>哨兵通过Gossip协议与其他哨兵进行通信，并监控主节点的健康状态。如果哨兵检测到主节点宕机，它会将该主节点标记为“<font color="#974806">主观失效</font>（Subjectively Down，简称SDOWN）”。</li>
+<li>哨兵继续和其他哨兵进行信息交换，如果超过配置的哨兵数量（如<code>sentinel monitor mymaster &lt;IP&gt; &lt;port&gt; &lt;quorum&gt;</code>中的<code>quorum</code>值）达成一致，那么哨兵会将主节点标记为“<font color="#974806">客观失效</font>（Objectively Down，简称ODOWN）”，进入故障转移流程。</li>
+</ul>
+</li>
+<li><strong>选择从节点</strong><ul>
+<li>在主节点被标记为ODOWN后，哨兵会开始选举新的主节点，按照选举机制依次筛选合适的从节点。</li>
+</ul>
+</li>
+<li><strong>提升从节点为主节点</strong><ul>
+<li>哨兵一旦选定某个从节点作为新的主节点，它会发送命令将该从节点提升为新的主节点。这个从节点将开始接受客户端的读写请求。</li>
+</ul>
+</li>
+<li><strong>通知其他从节点</strong><ul>
+<li>哨兵会通知剩下的从节点更新它们的复制目标，从原来的主节点转而复制新的主节点。</li>
+</ul>
+</li>
+<li><strong>通知客户端</strong><ul>
+<li>故障转移完成后，哨兵会通知客户端新的主节点地址，客户端可以根据此信息更新连接目标。</li>
+</ul>
+</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%AD%A6%E4%B9%A0/" class="category-chain-item">学习</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>【学习】Redis的集群模式</div>
+      <div>http://example.com/2024/09/24/0924-redis集群模式/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年9月24日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/09/15/%E3%80%90%E5%AD%A6%E4%B9%A0%E3%80%91%E7%AE%97%E6%B3%95-%E5%A0%86/" title="【学习】算法-堆">
+                        <span class="hidden-mobile">【学习】算法-堆</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
