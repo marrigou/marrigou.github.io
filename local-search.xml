@@ -251,6 +251,44 @@
   
   
   <entry>
+    <title>【胡思】如何手动开根号</title>
+    <link href="/2024/05/14/%E3%80%9000%E6%A8%A1%E6%9D%BF%20-%20%E5%89%AF%E6%9C%AC/"/>
+    <url>/2024/05/14/%E3%80%9000%E6%A8%A1%E6%9D%BF%20-%20%E5%89%AF%E6%9C%AC/</url>
+    
+    <content type="html"><![CDATA[]]></content>
+    
+    
+    <categories>
+      
+      <category>胡思</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>【胡思】如何手动开根号</title>
+    <link href="/2024/05/14/%E3%80%9000%E6%A8%A1%E6%9D%BF/"/>
+    <url>/2024/05/14/%E3%80%9000%E6%A8%A1%E6%9D%BF/</url>
+    
+    <content type="html"><![CDATA[<p>本篇转载：<a href="https://github.com/ascoders/weekly/blob/master/%E6%95%B0%E5%AD%A6%E4%B9%8B%E7%BE%8E/296.%E6%89%8B%E5%8A%A8%E7%AE%97%E6%A0%B9%E5%8F%B7.md">https://github.com/ascoders/weekly/blob/master/%E6%95%B0%E5%AD%A6%E4%B9%8B%E7%BE%8E/296.%E6%89%8B%E5%8A%A8%E7%AE%97%E6%A0%B9%E5%8F%B7.md</a></p><p>这篇文章解释得很清晰，这算是我从初中就在好奇的一个问题了，一直没有去找解决方案，今天无意看到，确实值得分享一下。</p><h2 id="研究问题"><a href="#研究问题" class="headerlink" title="研究问题"></a>研究问题</h2><p>这次研究的问题是 “如何手动算根号”。</p><p>我们都知道，平方很好算，但算根号很难。虽然算根号可以通过计算器按出来，但数学上也有优雅的方法快速得到算根号的近似值，掌握了手动算根号的原理，你可以得到以下两个提升：</p><ol><li>学会用心算方式算根号，不用再依赖计算器</li><li>对数学之美的感受 +100</li></ol><h2 id="推导"><a href="#推导" class="headerlink" title="推导"></a>推导</h2><h3 id="平方展开式"><a href="#平方展开式" class="headerlink" title="平方展开式"></a>平方展开式</h3><p>首先，<code>a + b</code> 的平方展开式如下：</p><p>$$(a+b)^2&#x3D;a^2+2ab+b^2$$</p><p>比如我们要对 82 算根号，假设：</p><p>$$a+b&#x3D;\sqrt{82}$$</p><p>那么：</p><p>$$(a+b)^2&#x3D;82$$</p><p>带入 <code>a + b</code> 的平方展开式：</p><p>$$82&#x3D;a^2+2ab+b^2$$</p><p>等式左边的值已经得到，接下来如果通过某种办法求出了等式右边 <code>a</code> 和 <code>b</code>，那么根据假设的定义：</p><p>$$a+b&#x3D;\sqrt{82}$$</p><p>根号 82 的值直接就可以通过 <code>a + b</code> 得到。</p><h3 id="如何求出-a-和-b"><a href="#如何求出-a-和-b" class="headerlink" title="如何求出 a 和 b"></a>如何求出 a 和 b</h3><p>等式右边还是比较复杂，需要进一步简化。</p><p>假设我们只寻找 <code>a</code> 远大于 <code>b</code> 的组合，那么这个组合下，<code>2ab</code> 更加远大于 <code>b^2</code>，所以可以把 <code>b^2</code> 舍去，得到：</p><p>$$82&#x3D;a^2+2ab$$</p><p>有突破口了，接下来思考，如果 <code>a</code> 特别大，比如等于 1 亿可以吗？</p><p>假设 <code>a</code> 是特别大的正数，但 <code>a + b</code> 等于根号 82，必然导致 <code>b</code> 也是一个很大的负数，这样 <code>2ab</code> 就是负数，而 <code>b^2</code> 是一个很大的正数，就不满足 <code>2ab</code> 远大于 <code>b^2</code> 的前提条件了。</p><p>所以 <code>a</code> 必须是一个尽可能大，但又要保证 <code>b</code> 依然是正数的值。</p><p>根据</p><p>$$82&#x3D;a^2+2ab$$</p><p>我们只要找到一个数的平方接近 82，但不大于 82 的数字，作为 <code>a</code> 即可，那就是 9 的平方 81 嘛。</p><p>那么 <code>a</code> 等于 9 确定下来了，易得 <code>b=1/18</code>，所以：</p><p>$$\sqrt{82}&#x3D;9+1&#x2F;18&#x3D;9.0555$$</p><p>按一下计算器会发现根号 82 的值是 <code>9.05538513814</code>，非常接近。</p><h2 id="速记"><a href="#速记" class="headerlink" title="速记"></a>速记</h2><p>根据推导结论，我们可以记住以下口诀：</p><p>对于任意数字算根号，比如对数字 <code>n</code> 算根号，先找到一个数，这个数的平方最接近并小于根号内的数字，比如求根号 82，先找到 9 作为 <code>a</code>，接下来根据下面公式得到 <code>b</code>:</p><p>$$b&#x3D;\frac{n-a^2}{2a}&#x3D;\frac{82-9^2}{2*9}$$</p><p>最后计算 <code>a + b</code> 得到的结果就是对 n 算根号的近似值。</p><h2 id="无法找到较大的-a-怎么办"><a href="#无法找到较大的-a-怎么办" class="headerlink" title="无法找到较大的 a 怎么办"></a>无法找到较大的 a 怎么办</h2><p>假设计算根号 2，只能把 <code>a</code> 拆成 1，但这不满足 <code>a</code> 远大于 <code>b</code>，此时可以把数字乘以 100，这样把得到的结果除以 10 即可。</p><p>比如计算根号 2，先计算根号 200。</p><p>200 可以把 <code>a</code> 设定为 14（平方是 196），那么 <code>b</code> 的值为：</p><p>$$b&#x3D;\frac{200-14^2}{2*14}&#x3D;0.142$$</p><p>那么根号 2 的值就是 <code>(14 + 0.142) / 10 = 1.4142</code></p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在推导过程中，数学之美体现在以下几个点：</p><p><strong>1. 利用平方展开式</strong></p><p>这是最本质的问题，即遇到一个难以心算根号的数字时，如果将要求的值转化为已知值的计算，问题就迎刃而解。</p><p>对任意根号数字来说，其平方都很好算，以及找到最接近该数字的平方值也很好算，满足这些要素的就是平方展开式，所以利用平方展开式是最巧妙的一步。</p><p><strong>2. 假设 <code>a</code> 远大于 <code>b</code></strong></p><p>如果让 <code>a</code> 远大于 <code>b</code>，可以极大简化求 <code>b</code> 的过程，虽然这也是这个方案结果是近似值的原因，但总的来说是利大于弊的。</p><p><strong>3. 找不到极大的 <code>a</code>，就创造条件</strong></p><p>当条件不满足拆出极大的 <code>a</code> 时，将数据乘以 100，不仅必然保证了极大 <code>a</code> 的出现，而且还利用了 100 的根号很容易计算的特性，巧妙的将人类不可解的问题转化为人类可解问题。</p><p>我们通过平方展开式学到了手动对任意正数开根号，如果哪天忘记公式了，也可以根据平方展开式重新推导一遍，这样就永远不会忘记啦。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>胡思</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>【学习】leetcode hot 100 (1)</title>
     <link href="/2024/05/02/leetcode%20hot%20100(1)/"/>
     <url>/2024/05/02/leetcode%20hot%20100(1)/</url>
